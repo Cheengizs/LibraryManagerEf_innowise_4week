@@ -1,7 +1,6 @@
-﻿using Application.Dto_s;
+﻿using Application.Common;
+using Application.Dto_s;
 using Application.RepositoriesInterfaces;
-using Application.Results.Book;
-using Application.Validators;
 using AutoMapper;
 using Domain.Models;
 using FluentValidation;
@@ -9,7 +8,7 @@ using FluentValidation.Results;
 
 namespace Application.Services;
 
-public class BookService
+public class BookService : IBookService
 {
     private readonly IBookRepository _repository;
     private readonly IMapper _mapper;
@@ -22,77 +21,90 @@ public class BookService
         _validator = validator;
     }
 
-    public async Task<List<BookResponse>> GetAllBooksAsync()
+    public async Task<ServiceResult<List<BookResponse>>> GetAllBooksAsync()
     {
         List<Book> booksFromRepo = await _repository.GetAllBooksAsync();
-        List<BookResponse> result = _mapper.Map<List<BookResponse>>(booksFromRepo);
+        List<BookResponse> booksResult = _mapper.Map<List<BookResponse>>(booksFromRepo);
+        ServiceResult<List<BookResponse>> result = ServiceResult<List<BookResponse>>.Success(booksResult);
         return result;
     }
 
-    public async Task<BookResponse?> GetBookByIdAsync(int id)
+    public async Task<ServiceResult<BookResponse>> GetBookByIdAsync(int id)
     {
         Book? bookFromRepo = await _repository.GetBookByIdAsync(id);
-        if(bookFromRepo == null)
-            return null;
-        
-        BookResponse result = _mapper.Map<BookResponse>(bookFromRepo);
-        return result;
-    }
-
-    public async Task<List<BookResponse>> GetBooksByAuthorIdAsync(int authorId)
-    {
-        List<Book> booksFromRepo = await _repository.GetBooksByAuthorIdAsync(authorId);
-        List<BookResponse> result = _mapper.Map<List<BookResponse>>(booksFromRepo);
-        return result;
-    }
-
-    public async Task<List<BookResponse>> GetBooksAfterAsync(int year)
-    {
-        List<Book> booksFromRepo = await _repository.GetBooksAfterYearAsync(year);
-        List<BookResponse> result = _mapper.Map<List<BookResponse>>(booksFromRepo);
-        return result;
-    }
-
-    public async Task<BookResult> CreateBookAsync(BookRequest bookRequest)
-    {
-        ValidationResult validationResult = await _validator.ValidateAsync(bookRequest);
-        if (!validationResult.IsValid)
-        {
-            return new BookResult { Success = false, Messages = validationResult.ToDictionary().ToDictionary() };
-        }
-        
-        Book book = _mapper.Map<Book>(bookRequest);
-        
-        await _repository.AddBookAsync(book);
-        
-        BookResult result = new BookResult { Success = true };
-        return result;
-    }
-
-    public async Task<BookResult> UpdateBookAsync(BookRequest bookRequest)
-    {
-        ValidationResult validationResult = await _validator.ValidateAsync(bookRequest);
-
-        if (!validationResult.IsValid)
-        {
-            return new BookResult { Success = false, Messages = validationResult.ToDictionary().ToDictionary() };
-        }
-        Book book = _mapper.Map<Book>(bookRequest);
-        await _repository.UpdateBookAsync(book);
-        BookResult result = new BookResult { Success = true };
-        return result;
-    }
-
-    public async Task<BookResult> DeleteBookByIdAsync(int id)
-    {
-        Book? bookFromRepo = await _repository.GetBookByIdAsync(id);
-        
         if (bookFromRepo == null)
         {
-            return new BookResult(){Success = false, Messages = new Dictionary<string, string[]>() };
+            ServiceResult<BookResponse> failResult = ServiceResult<BookResponse>.Failure(["Book not found"]);
         }
+        
+        BookResponse bookResult = _mapper.Map<BookResponse>(bookFromRepo);
+        ServiceResult<BookResponse> result = ServiceResult<BookResponse>.Success(bookResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<List<BookResponse>>> GetBooksByAuthorIdAsync(int authorId)
+    {
+        List<Book> booksFromRepo = await _repository.GetBooksByAuthorIdAsync(authorId);
+        List<BookResponse> bookResult = _mapper.Map<List<BookResponse>>(booksFromRepo);
+        ServiceResult<List<BookResponse>> result = ServiceResult<List<BookResponse>>.Success(bookResult); 
+        return result;
+    }
+
+    public async Task<ServiceResult<List<BookResponse>>> GetBooksAfterAsync(int year)
+    {
+        List<Book> booksFromRepo = await _repository.GetBooksAfterYearAsync(year);
+        List<BookResponse> bookResult = _mapper.Map<List<BookResponse>>(booksFromRepo);
+        ServiceResult<List<BookResponse>> result = ServiceResult<List<BookResponse>>.Success(bookResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<BookResponse>> CreateBookAsync(BookRequest bookRequest)
+    {
+        ValidationResult validationResult = await _validator.ValidateAsync(bookRequest);
+        if (!validationResult.IsValid)
+        {
+            ServiceResult<BookResponse> res =
+                ServiceResult<BookResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+            return res;
+        }
+
+        Book book = _mapper.Map<Book>(bookRequest);
+
+        await _repository.AddBookAsync(book);
+        BookResponse bookResponse = _mapper.Map<BookResponse>(book);
+        
+        ServiceResult<BookResponse> result = ServiceResult<BookResponse>.Success(bookResponse);
+        return result;
+    }
+
+    public async Task<ServiceResult<BookResponse>> UpdateBookAsync(BookRequest bookRequest)
+    {
+        ValidationResult validationResult = await _validator.ValidateAsync(bookRequest);
+        if (!validationResult.IsValid) 
+        {
+            ServiceResult<BookResponse> res =
+                ServiceResult<BookResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+            return res;
+        }
+
+        Book book = _mapper.Map<Book>(bookRequest);
+        await _repository.UpdateBookAsync(book);
+        
+        BookResponse bookResponse = _mapper.Map<BookResponse>(book);
+        ServiceResult<BookResponse> result = ServiceResult<BookResponse>.Success(bookResponse);
+        return result;
+    }
+
+    public async Task<ServiceResult> DeleteBookByIdAsync(int id)
+    {
+        var bookFromRepo = await _repository.GetBookByIdAsync(id);
+        if (bookFromRepo == null)
+        {
+            return ServiceResult.Failure(["Not found"]);
+        }
+        
         await _repository.DeleteBookAsync(id);
-        BookResult result = new BookResult { Success = true };
+        ServiceResult result = ServiceResult.Success();
         return result;
     }
 }

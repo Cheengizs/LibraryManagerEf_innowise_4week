@@ -1,4 +1,6 @@
+using Application.RepositoriesInterfaces;
 using Infrastructure.DatabaseContexts;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,14 +14,14 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
 });
 
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.MapOpenApi();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+app.MapOpenApi();
 
 app.UseHttpsRedirection();
 

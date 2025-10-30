@@ -1,0 +1,111 @@
+﻿using Application.Common;
+using Application.Dto_s;
+using Application.Dto_s.Author;
+using Application.RepositoriesInterfaces;
+using AutoMapper;
+using Domain.Models;
+using FluentValidation;
+using FluentValidation.Results;
+
+namespace Application.Services;
+
+public class AuthorService : IAuthorService
+{
+    private readonly IAuthorRepository _repository;
+    private readonly IMapper _mapper;
+    private readonly IValidator<AuthorRequest> _validator;
+
+    public AuthorService(IAuthorRepository repository, IMapper mapper, IValidator<AuthorRequest> validator)
+    {
+        _repository = repository;
+        _mapper = mapper;
+        _validator = validator;
+    }
+
+    public async Task<ServiceResult<List<AuthorResponse>>> GetAllAuthorsAsync()
+    {
+        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
+        ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<AuthorResponse>> GetAuthorByIdAsync(int id)
+    {
+        Author? authorFromRepo = await _repository.GetAuthorByIdAsync(id);
+        if (authorFromRepo == null)
+        {
+            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"]);
+            return failResult;
+        }
+        
+        AuthorResponse authorResult = _mapper.Map<AuthorResponse>(authorFromRepo);
+        ServiceResult<AuthorResponse> result = ServiceResult<AuthorResponse>.Success(authorResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<List<AuthorResponse>>> GetAuthorByNameAsync(string name)
+    {
+        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
+        ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
+        return result;
+    }
+    
+    public async Task<ServiceResult<List<AuthorResponse>>> GetAuthorsWithBooksMoreThanAsync(int booksCount)
+    {
+        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
+        ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<AuthorResponse>> AddAuthorAsync(AuthorRequest authorRequest)
+    {
+        ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);
+        if (!validationResult.IsValid)
+        {
+            ServiceResult<AuthorResponse> failResult =
+                ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+            return failResult;
+        }
+        
+        Author author = _mapper.Map<Author>(authorRequest);
+        
+        await _repository.AddAuthorAsync(author);
+        AuthorResponse authorResult = _mapper.Map<AuthorResponse>(author);
+        
+        ServiceResult<AuthorResponse> result = ServiceResult<AuthorResponse>.Success(authorResult);
+        return result;
+    }
+
+    public async Task<ServiceResult<AuthorResponse>> UpdateAuthorAsync(AuthorRequest authorRequest)
+    {
+        ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);
+        if (!validationResult.IsValid)
+        {
+            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+            return failResult;
+        }
+        
+        Author author = _mapper.Map<Author>(authorRequest);
+        await _repository.UpdateAuthorAsync(author);
+        AuthorResponse authorResult = _mapper.Map<AuthorResponse>(author);
+        ServiceResult<AuthorResponse> result = ServiceResult<AuthorResponse>.Success(authorResult);
+        return result;
+    }
+
+    public async Task<ServiceResult> DeleteAuthorAsync(int authorId)
+    {
+        var author = await _repository.GetAuthorByIdAsync(authorId);
+        if (author == null)
+        {
+            ServiceResult failResult = ServiceResult.Failure(["Author not found"]);
+            return failResult;
+        }
+        
+        await _repository.DeleteAuthorAsync(authorId);
+        ServiceResult result = ServiceResult.Success();
+        return result;
+    }
+}
