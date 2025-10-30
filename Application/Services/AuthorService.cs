@@ -1,5 +1,4 @@
-﻿using Application.Common;
-using Application.Dto_s;
+﻿using Application.Commons;
 using Application.Dto_s.Author;
 using Application.RepositoriesInterfaces;
 using AutoMapper;
@@ -35,7 +34,7 @@ public class AuthorService : IAuthorService
         Author? authorFromRepo = await _repository.GetAuthorByIdAsync(id);
         if (authorFromRepo == null)
         {
-            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"]);
+            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"], ServiceErrorCode.Validation);
             return failResult;
         }
         
@@ -66,7 +65,7 @@ public class AuthorService : IAuthorService
         if (!validationResult.IsValid)
         {
             ServiceResult<AuthorResponse> failResult =
-                ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+                ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList(), ServiceErrorCode.Validation);
             return failResult;
         }
         
@@ -84,7 +83,7 @@ public class AuthorService : IAuthorService
         ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);
         if (!validationResult.IsValid)
         {
-            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList());
+            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(validationResult.Errors.Select(x => x.ErrorMessage).ToList(), ServiceErrorCode.Validation);
             return failResult;
         }
         
@@ -101,7 +100,7 @@ public class AuthorService : IAuthorService
         var author = await _repository.GetAuthorByIdAsync(authorId);
         if (author == null)
         {
-            ServiceResult failResult = ServiceResult.Failure(["Author not found"]);
+            ServiceResult failResult = ServiceResult.Failure(["Author not found"], ServiceErrorCode.NotFound);
             return failResult;
         }
         
