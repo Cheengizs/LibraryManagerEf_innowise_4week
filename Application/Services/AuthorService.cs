@@ -79,7 +79,7 @@ public class AuthorService : IAuthorService
         return result;
     }
 
-    public async Task<ServiceResult<AuthorResponse>> UpdateAuthorAsync(AuthorRequest authorRequest)
+    public async Task<ServiceResult<AuthorResponse>> UpdateAuthorAsync(int id, AuthorRequest authorRequest)
     {
         ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);
         if (!validationResult.IsValid)
@@ -89,6 +89,7 @@ public class AuthorService : IAuthorService
         }
         
         Author author = _mapper.Map<Author>(authorRequest);
+        author.Id = id;
         await _repository.UpdateAuthorAsync(author);
         AuthorResponse authorResult = _mapper.Map<AuthorResponse>(author);
         ServiceResult<AuthorResponse> result = ServiceResult<AuthorResponse>.Success(authorResult);

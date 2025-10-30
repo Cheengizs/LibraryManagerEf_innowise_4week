@@ -10,6 +10,6 @@ public interface IAuthorService
     Task<ServiceResult<List<AuthorResponse>>> GetAuthorByNameAsync(string name);
     Task<ServiceResult<List<AuthorResponse>>> GetAuthorsWithBooksMoreThanAsync(int booksCount);
     Task<ServiceResult<AuthorResponse>> AddAuthorAsync(AuthorRequest authorRequest);
-    Task<ServiceResult<AuthorResponse>> UpdateAuthorAsync(AuthorRequest authorRequest);
+    Task<ServiceResult<AuthorResponse>> UpdateAuthorAsync(int id, AuthorRequest authorRequest);
     Task<ServiceResult> DeleteAuthorAsync(int authorId);
 }

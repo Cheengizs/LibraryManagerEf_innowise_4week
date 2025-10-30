@@ -77,7 +77,7 @@ public class BookService : IBookService
         return result;
     }
 
-    public async Task<ServiceResult<BookResponse>> UpdateBookAsync(BookRequest bookRequest)
+    public async Task<ServiceResult<BookResponse>> UpdateBookAsync(int id, BookRequest bookRequest)
     {
         ValidationResult validationResult = await _validator.ValidateAsync(bookRequest);
         if (!validationResult.IsValid) 
@@ -88,6 +88,7 @@ public class BookService : IBookService
         }
 
         Book book = _mapper.Map<Book>(bookRequest);
+        book.Id = id;
         await _repository.UpdateBookAsync(book);
         
         BookResponse bookResponse = _mapper.Map<BookResponse>(book);
