@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace Application.Validators;
 
-internal class BookValidator : AbstractValidator<BookRequest>
+public class BookValidator : AbstractValidator<BookRequest>
 {
     public BookValidator()
     {

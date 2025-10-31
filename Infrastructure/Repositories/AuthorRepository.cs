@@ -37,7 +37,7 @@ public class AuthorRepository : IAuthorRepository
 
     public async Task<List<Author>> GetAuthorByNameAsync(string name)
     {
-        List<AuthorEntity> authorsFromDb = await _context.Authors.Where(a => a.Name.Contains(name)).ToListAsync();
+        List<AuthorEntity> authorsFromDb = await _context.Authors.Where(a => a.Name.Trim().ToLower().Contains(name.Trim().ToLower())).ToListAsync();
         List<Author> result = _mapper.Map<List<Author>>(authorsFromDb);
         return result;
     }
@@ -49,11 +49,13 @@ public class AuthorRepository : IAuthorRepository
         return result;
     }
 
-    public async Task AddAuthorAsync(Author author)
+    public async Task<Author> AddAuthorAsync(Author author)
     {
         AuthorEntity authorToAdd = _mapper.Map<AuthorEntity>(author);
         await _context.Authors.AddAsync(authorToAdd);
         await _context.SaveChangesAsync();
+        Author result = _mapper.Map<Author>(authorToAdd);
+        return result;
     }
 
     public async Task UpdateAuthorAsync(Author author)

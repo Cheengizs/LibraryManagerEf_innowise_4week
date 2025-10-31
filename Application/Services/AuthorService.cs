@@ -34,7 +34,7 @@ public class AuthorService : IAuthorService
         Author? authorFromRepo = await _repository.GetAuthorByIdAsync(id);
         if (authorFromRepo == null)
         {
-            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"], ServiceErrorCode.Validation);
+            ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"], ServiceErrorCode.NotFound);
             return failResult;
         }
         
@@ -45,7 +45,7 @@ public class AuthorService : IAuthorService
 
     public async Task<ServiceResult<List<AuthorResponse>>> GetAuthorByNameAsync(string name)
     {
-        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<Author> authorsFromRepo = await _repository.GetAuthorByNameAsync(name);
         List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
         ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
         return result;
@@ -53,7 +53,7 @@ public class AuthorService : IAuthorService
     
     public async Task<ServiceResult<List<AuthorResponse>>> GetAuthorsWithBooksMoreThanAsync(int booksCount)
     {
-        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<Author> authorsFromRepo = await _repository.GetAuthorsWithBooksMoreThanAsync(booksCount);
         List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
         ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
         return result;
@@ -71,8 +71,8 @@ public class AuthorService : IAuthorService
         
         Author author = _mapper.Map<Author>(authorRequest);
         
-        await _repository.AddAuthorAsync(author);
-        AuthorResponse authorResult = _mapper.Map<AuthorResponse>(author);
+        var responseFromRepo = await _repository.AddAuthorAsync(author);
+        AuthorResponse authorResult = _mapper.Map<AuthorResponse>(responseFromRepo);
         
         ServiceResult<AuthorResponse> result = ServiceResult<AuthorResponse>.Success(authorResult);
         return result;

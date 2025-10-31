@@ -50,11 +50,13 @@ public class BookRepository : IBookRepository
         return result;
     }
 
-    public async Task AddBookAsync(Book book)
+    public async Task<Book> AddBookAsync(Book book)
     {
         BookEntity bookToAdd = _mapper.Map<BookEntity>(book);
         await _context.Books.AddAsync(bookToAdd);
         await _context.SaveChangesAsync();
+        Book result = _mapper.Map<Book>(bookToAdd);
+        return result;
     }
 
     public async Task UpdateBookAsync(Book book)

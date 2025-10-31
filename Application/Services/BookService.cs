@@ -79,8 +79,8 @@ public class BookService : IBookService
 
         Book book = _mapper.Map<Book>(bookRequest);
 
-        await _bookRepository.AddBookAsync(book);
-        BookResponse bookResponse = _mapper.Map<BookResponse>(book);
+        Book responseFromRepo = await _bookRepository.AddBookAsync(book);
+        BookResponse bookResponse = _mapper.Map<BookResponse>(responseFromRepo);
         
         ServiceResult<BookResponse> result = ServiceResult<BookResponse>.Success(bookResponse);
         return result;

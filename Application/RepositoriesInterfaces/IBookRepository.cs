@@ -8,7 +8,7 @@ public interface IBookRepository
     Task<Book?> GetBookByIdAsync(int id);
     Task<List<Book>> GetBooksByAuthorIdAsync(int authorId);
     Task<List<Book>> GetBooksAfterYearAsync(int year);
-    Task AddBookAsync(Book book);
+    Task<Book> AddBookAsync(Book book);
     Task UpdateBookAsync(Book book);
     Task DeleteBookAsync(int id);
     

@@ -16,7 +16,7 @@ public class BookController : ControllerBase
         _bookService = bookService;
     }
 
-    [HttpGet("all")]
+    [HttpGet]
     public async Task<ActionResult<List<BookResponse>>> GetAllBooksAsync()
     {
         ServiceResult<List<BookResponse>> serviceResult = await _bookService.GetAllBooksAsync();
@@ -94,7 +94,7 @@ public class BookController : ControllerBase
         return Created(location, bookResult);
     }
 
-    [HttpPut("updateBook/{bookId:int}")]
+    [HttpPut("{bookId:int}")]
     public async Task<ActionResult<BookResponse>> UpdateBookAsync(int bookId,
         [FromBody] BookRequest bookRequest)
     {
@@ -111,11 +111,10 @@ public class BookController : ControllerBase
         }
 
         BookResponse bookResult = serviceResult.Value;
-        var location = $"{Request.Scheme}://{Request.Host}/api/v1/books/{bookResult.Id}";
         return Ok(bookResult);
     }
 
-    [HttpDelete("deleteBook/{id:int}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteBookAsync(int id)
     {
         ServiceResult serviceResult = await _bookService.DeleteBookByIdAsync(id);
