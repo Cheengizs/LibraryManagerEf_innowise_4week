@@ -34,7 +34,7 @@ public class BookService : IBookService
     public async Task<ServiceResult<BookResponse>> GetBookByIdAsync(int id)
     {
         Book? bookFromRepo = await _bookRepository.GetBookByIdAsync(id);
-        if (bookFromRepo == null)
+        if (bookFromRepo is null)
         {
             ServiceResult<BookResponse> failResult = ServiceResult<BookResponse>.Failure(["Book not found"], ServiceErrorCode.NotFound);
         }
@@ -115,7 +115,7 @@ public class BookService : IBookService
     public async Task<ServiceResult> DeleteBookByIdAsync(int id)
     {
         var bookFromRepo = await _bookRepository.GetBookByIdAsync(id);
-        if (bookFromRepo == null)
+        if (bookFromRepo is null)
         {
             return ServiceResult.Failure(["Not found"], ServiceErrorCode.NotFound);
         }

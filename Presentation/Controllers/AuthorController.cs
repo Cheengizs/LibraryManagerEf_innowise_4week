@@ -1,5 +1,6 @@
 ﻿using Application.Commons;
 using Application.Dto_s.Author;
+using Application.Filters;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,16 +18,15 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AuthorResponse>>> GetAllAuthorsAsync()
+    public async Task<ActionResult<List<AuthorResponse>>> GetAllAuthorsAsync(
+        [FromQuery] AuthorFilter? filter)
     {
-        ServiceResult<List<AuthorResponse>> serviceResult = await _authorService.GetAllAuthorsAsync();
-        if (!serviceResult.IsSuccess)
-        {
-            return BadRequest(serviceResult.Errors);
-        }
+        var serviceResult = await _authorService.GetAllAuthorsAsync(filter);
 
-        List<AuthorResponse> authors = serviceResult.Value;
-        return Ok(authors);
+        if (!serviceResult.IsSuccess)
+            return BadRequest(serviceResult.Errors);
+
+        return Ok(serviceResult.Value);
     }
 
     [HttpGet("{id:int}")]
@@ -49,20 +49,6 @@ public class AuthorController : ControllerBase
     public async Task<ActionResult<List<AuthorResponse>>> GetAuthorByNameAsync(string name)
     {
         ServiceResult<List<AuthorResponse>> serviceResult = await _authorService.GetAuthorByNameAsync(name);
-        if (!serviceResult.IsSuccess)
-        {
-            return BadRequest(serviceResult.Errors);
-        }
-
-        List<AuthorResponse> authors = serviceResult.Value;
-        return Ok(authors);
-    }
-
-    [HttpGet("with-books-more-than/{count:int}")]
-    public async Task<ActionResult<List<AuthorResponse>>> GetAuthorsWithBooksMoreThanAsync(int count)
-    {
-        ServiceResult<List<AuthorResponse>>
-            serviceResult = await _authorService.GetAuthorsWithBooksMoreThanAsync(count);
         if (!serviceResult.IsSuccess)
         {
             return BadRequest(serviceResult.Errors);

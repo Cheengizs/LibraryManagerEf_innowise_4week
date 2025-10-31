@@ -1,4 +1,5 @@
-﻿using Application.RepositoriesInterfaces;
+﻿using Application.Filters;
+using Application.RepositoriesInterfaces;
 using AutoMapper;
 using Domain.Models;
 using Infrastructure.DatabaseContexts;
@@ -18,33 +19,41 @@ public class AuthorRepository : IAuthorRepository
         _mapper = mapper;
     }
 
-    public async Task<List<Author>> GetAllAuthorsAsync()
+    public async Task<List<Author>> GetAllAuthorsAsync(AuthorFilter? filter = null)
     {
-        List<AuthorEntity> authorsFromDb = await _context.Authors.ToListAsync();
-        List<Author> result = _mapper.Map<List<Author>>(authorsFromDb);
-        return result;
+        var query = _context.Authors.AsQueryable();
+
+        if (filter is not null)
+        {
+            if (filter.MinimumBooksAmount.HasValue)
+            {
+                query = query.Where(a => a.Books.Count() >= filter.MinimumBooksAmount.Value);
+            }
+
+            if (filter.MaximumBooksAmount.HasValue)
+            {
+                query = query.Where(a => a.Books.Count() <= filter.MaximumBooksAmount.Value);
+            }
+        }
+
+        var authorsFromDb = await query.ToListAsync();
+        return _mapper.Map<List<Author>>(authorsFromDb);
     }
 
     public async Task<Author?> GetAuthorByIdAsync(int id)
     {
         AuthorEntity? authorFromDb = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
-        if(authorFromDb == null)
+        if (authorFromDb is null)
             return null;
-        
+
         Author result = _mapper.Map<Author>(authorFromDb);
         return result;
     }
 
     public async Task<List<Author>> GetAuthorByNameAsync(string name)
     {
-        List<AuthorEntity> authorsFromDb = await _context.Authors.Where(a => a.Name.Trim().ToLower().Contains(name.Trim().ToLower())).ToListAsync();
-        List<Author> result = _mapper.Map<List<Author>>(authorsFromDb);
-        return result;
-    }
-
-    public async Task<List<Author>> GetAuthorsWithBooksMoreThanAsync(int booksCount)
-    {
-        List<AuthorEntity> authorsFromDb = await _context.Authors.Where(a => a.Books.Count >= booksCount).ToListAsync();
+        List<AuthorEntity> authorsFromDb = await _context.Authors
+            .Where(a => a.Name.Trim().ToLower().Contains(name.Trim().ToLower())).ToListAsync();
         List<Author> result = _mapper.Map<List<Author>>(authorsFromDb);
         return result;
     }
@@ -61,9 +70,9 @@ public class AuthorRepository : IAuthorRepository
     public async Task UpdateAuthorAsync(Author author)
     {
         AuthorEntity? authorFromDb = await _context.Authors.FirstOrDefaultAsync(a => a.Id == author.Id);
-        if (authorFromDb == null)
+        if (authorFromDb is null)
             return;
-        
+
         authorFromDb.Name = author.Name;
         authorFromDb.DateOfBirth = author.DateOfBirth;
         await _context.SaveChangesAsync();
@@ -72,9 +81,9 @@ public class AuthorRepository : IAuthorRepository
     public async Task DeleteAuthorAsync(int id)
     {
         AuthorEntity? authorFromDb = _context.Authors.FirstOrDefault(a => a.Id == id);
-        if (authorFromDb == null)
+        if (authorFromDb is null)
             return;
-        
+
         _context.Authors.Remove(authorFromDb);
         await _context.SaveChangesAsync();
     }

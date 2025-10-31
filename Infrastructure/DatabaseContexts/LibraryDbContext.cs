@@ -9,9 +9,4 @@ public class LibraryDbContext : DbContext
     
     public DbSet<BookEntity> Books { get; set; }
     public DbSet<AuthorEntity> Authors { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        
-    }
 }

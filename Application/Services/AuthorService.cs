@@ -1,5 +1,6 @@
 ﻿using Application.Commons;
 using Application.Dto_s.Author;
+using Application.Filters;
 using Application.RepositoriesInterfaces;
 using AutoMapper;
 using Domain.Models;
@@ -21,9 +22,9 @@ public class AuthorService : IAuthorService
         _validator = validator;
     }
 
-    public async Task<ServiceResult<List<AuthorResponse>>> GetAllAuthorsAsync()
+    public async Task<ServiceResult<List<AuthorResponse>>> GetAllAuthorsAsync(AuthorFilter? filter = null)
     {
-        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync();
+        List<Author> authorsFromRepo = await _repository.GetAllAuthorsAsync(filter);
         List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
         ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
         return result;
@@ -32,7 +33,7 @@ public class AuthorService : IAuthorService
     public async Task<ServiceResult<AuthorResponse>> GetAuthorByIdAsync(int id)
     {
         Author? authorFromRepo = await _repository.GetAuthorByIdAsync(id);
-        if (authorFromRepo == null)
+        if (authorFromRepo is null)
         {
             ServiceResult<AuthorResponse> failResult = ServiceResult<AuthorResponse>.Failure(["Book not found"], ServiceErrorCode.NotFound);
             return failResult;
@@ -51,14 +52,6 @@ public class AuthorService : IAuthorService
         return result;
     }
     
-    public async Task<ServiceResult<List<AuthorResponse>>> GetAuthorsWithBooksMoreThanAsync(int booksCount)
-    {
-        List<Author> authorsFromRepo = await _repository.GetAuthorsWithBooksMoreThanAsync(booksCount);
-        List<AuthorResponse> authorsResult = _mapper.Map<List<AuthorResponse>>(authorsFromRepo);
-        ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
-        return result;
-    }
-
     public async Task<ServiceResult<AuthorResponse>> AddAuthorAsync(AuthorRequest authorRequest)
     {
         ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);
@@ -98,7 +91,7 @@ public class AuthorService : IAuthorService
     public async Task<ServiceResult> DeleteAuthorAsync(int authorId)
     {
         var author = await _repository.GetAuthorByIdAsync(authorId);
-        if (author == null)
+        if (author is null)
         {
             ServiceResult failResult = ServiceResult.Failure(["Author not found"], ServiceErrorCode.NotFound);
             return failResult;

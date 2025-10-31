@@ -74,7 +74,7 @@ public class BookController : ControllerBase
         return Ok(books);
     }
 
-    [HttpPost("createBook")]
+    [HttpPost]
     public async Task<ActionResult<BookResponse>> CreateBookAsync([FromBody] BookRequest bookRequest)
     {
         ServiceResult<BookResponse> serviceResult = await _bookService.CreateBookAsync(bookRequest);

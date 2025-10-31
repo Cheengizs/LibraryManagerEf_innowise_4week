@@ -29,7 +29,7 @@ public class BookRepository : IBookRepository
     public async Task<Book?> GetBookByIdAsync(int id)
     {
         BookEntity? bookFromDb = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
-        if(bookFromDb == null)
+        if(bookFromDb is null)
             return null;
         
         Book result = _mapper.Map<Book>(bookFromDb);
@@ -62,7 +62,7 @@ public class BookRepository : IBookRepository
     public async Task UpdateBookAsync(Book book)
     {
         BookEntity? bookFromDb = await _context.Books.FirstOrDefaultAsync(b => b.Id == book.Id);
-        if(bookFromDb == null)
+        if(bookFromDb is null)
             return;
         
         bookFromDb.Title = book.Title;
@@ -74,7 +74,7 @@ public class BookRepository : IBookRepository
     public async Task DeleteBookAsync(int id)
     {
         BookEntity? bookFromDb = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
-        if(bookFromDb == null)
+        if(bookFromDb is null)
             return;
         
         _context.Books.Remove(bookFromDb);
