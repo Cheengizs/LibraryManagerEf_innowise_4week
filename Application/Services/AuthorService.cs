@@ -1,5 +1,6 @@
 ﻿using Application.Commons;
 using Application.Dto_s.Author;
+using Application.Dto_s.Book;
 using Application.Filters;
 using Application.RepositoriesInterfaces;
 using AutoMapper;
@@ -51,7 +52,15 @@ public class AuthorService : IAuthorService
         ServiceResult<List<AuthorResponse>> result = ServiceResult<List<AuthorResponse>>.Success(authorsResult);
         return result;
     }
-    
+
+    public async Task<ServiceResult<List<BookResponse>>> GetAuthorIdBooksAsync(int year)
+    {
+        List<Book> booksFromRepo = await _repository.GetAuthorIdBooksAsync(year);
+        List<BookResponse> booksResult = _mapper.Map<List<BookResponse>>(booksFromRepo);
+        ServiceResult<List<BookResponse>> result = ServiceResult<List<BookResponse>>.Success(booksResult);
+        return result;
+    }
+
     public async Task<ServiceResult<AuthorResponse>> AddAuthorAsync(AuthorRequest authorRequest)
     {
         ValidationResult validationResult = await _validator.ValidateAsync(authorRequest);

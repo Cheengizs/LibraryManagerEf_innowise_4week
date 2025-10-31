@@ -45,22 +45,6 @@ public class BookController : ControllerBase
         return Ok(book);
     }
 
-    [HttpGet("byAuthor/{authorId:int}")]
-    public async Task<ActionResult<List<BookResponse>>> GetBooksByAuthorIdAsync(int authorId)
-    {
-        ServiceResult<List<BookResponse>> serviceResult = await _bookService.GetBooksByAuthorIdAsync(authorId);
-        if (!serviceResult.IsSuccess)
-        {
-            if (serviceResult.ErrorCode == ServiceErrorCode.NotFound)
-                return NotFound("Book not found");
-
-            return BadRequest(serviceResult.Errors);
-        }
-
-        List<BookResponse> books = serviceResult.Value;
-        return Ok(books);
-    }
-
     [HttpGet("getAfter/{year:int}")]
     public async Task<ActionResult<List<BookResponse>>> GetBooksAfterAsync(int year)
     {

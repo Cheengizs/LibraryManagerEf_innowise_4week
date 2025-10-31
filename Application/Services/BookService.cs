@@ -44,14 +44,6 @@ public class BookService : IBookService
         return result;
     }
 
-    public async Task<ServiceResult<List<BookResponse>>> GetBooksByAuthorIdAsync(int authorId)
-    {
-        List<Book> booksFromRepo = await _bookRepository.GetBooksByAuthorIdAsync(authorId);
-        List<BookResponse> bookResult = _mapper.Map<List<BookResponse>>(booksFromRepo);
-        ServiceResult<List<BookResponse>> result = ServiceResult<List<BookResponse>>.Success(bookResult); 
-        return result;
-    }
-
     public async Task<ServiceResult<List<BookResponse>>> GetBooksAfterAsync(int year)
     {
         List<Book> booksFromRepo = await _bookRepository.GetBooksAfterYearAsync(year);

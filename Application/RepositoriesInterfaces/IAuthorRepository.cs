@@ -8,6 +8,7 @@ public interface IAuthorRepository
     Task<List<Author>> GetAllAuthorsAsync(AuthorFilter? filter = null);
     Task<Author?> GetAuthorByIdAsync(int id);
     Task<List<Author>> GetAuthorByNameAsync(string name);
+    Task<List<Book>> GetAuthorIdBooksAsync(int year);
     Task<Author> AddAuthorAsync(Author author);
     Task UpdateAuthorAsync(Author author);
     Task DeleteAuthorAsync(int id);

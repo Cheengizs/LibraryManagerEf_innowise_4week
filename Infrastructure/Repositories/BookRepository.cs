@@ -36,13 +36,6 @@ public class BookRepository : IBookRepository
         return result;
     }
 
-    public async Task<List<Book>> GetBooksByAuthorIdAsync(int authorId)
-    {
-        List<BookEntity> booksFromDb = await _context.Books.Where(b => b.AuthorId == authorId).ToListAsync();
-        List<Book> result = _mapper.Map<List<Book>>(booksFromDb);
-        return result;
-    }
-
     public async Task<List<Book>> GetBooksAfterYearAsync(int year)
     {
         List<BookEntity> booksFromDb = await _context.Books.Where(b => b.PublishedYear >= year).ToListAsync();

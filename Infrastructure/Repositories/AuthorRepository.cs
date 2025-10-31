@@ -58,6 +58,14 @@ public class AuthorRepository : IAuthorRepository
         return result;
     }
 
+    public Task<List<Book>> GetAuthorIdBooksAsync(int authorId)
+    {   
+        List<BookEntity> booksFromDb = _context.Books
+            .Where(b => b.AuthorId == authorId).ToList();
+        List<Book> result = _mapper.Map<List<Book>>(booksFromDb);
+        return Task.FromResult(result);
+    }
+
     public async Task<Author> AddAuthorAsync(Author author)
     {
         AuthorEntity authorToAdd = _mapper.Map<AuthorEntity>(author);

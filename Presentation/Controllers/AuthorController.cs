@@ -1,5 +1,6 @@
 ﻿using Application.Commons;
 using Application.Dto_s.Author;
+using Application.Dto_s.Book;
 using Application.Filters;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -58,6 +59,22 @@ public class AuthorController : ControllerBase
         return Ok(authors);
     }
 
+    [HttpGet("{id:int}/books")]
+    public async Task<ActionResult<List<BookResponse>>> GetBooksByAuthorIdAsync(int id)
+    {
+        ServiceResult<List<BookResponse>> serviceResult = await _authorService.GetAuthorIdBooksAsync(id);
+        if (!serviceResult.IsSuccess)
+        {
+            if (serviceResult.ErrorCode == ServiceErrorCode.NotFound)
+                return NotFound("Author not found");
+
+            return BadRequest(serviceResult.Errors);
+        }
+
+        List<BookResponse> books = serviceResult.Value;
+        return Ok(books);
+    }
+    
     [HttpPost]
     public async Task<ActionResult<AuthorResponse>> CreateAuthorAsync([FromBody] AuthorRequest authorRequest)
     {
